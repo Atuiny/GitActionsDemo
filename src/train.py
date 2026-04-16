@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+
 import joblib
 from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
@@ -58,10 +59,18 @@ new_candidate = {
 print(new_candidate)
 if os.path.exists(registry_path):
     with open(registry_path, "r") as f:
-        current_champion = json.load(f)
+        try:
+            current_champion = json.load(f)
+        except json.JSONDecodeError:
+            current_champion = None
 
     # Replace champion only if the new model has better F1
-    if new_candidate["f1_score"] > current_champion.get("f1_score", 0):
+    if not current_champion:
+        new_candidate["status"] = "champion"
+        with open(registry_path, "w") as f:
+            json.dump(new_candidate, f, indent=4)
+        print("Champion registry was empty. New model set as champion.")
+    elif new_candidate["f1_score"] > current_champion.get("f1_score", 0):
         new_candidate["status"] = "champion"
         with open(registry_path, "w") as f:
             json.dump(new_candidate, f, indent=4)
