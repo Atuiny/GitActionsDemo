@@ -3,6 +3,7 @@ name: ML Pipeline with GitHub Actions
 on:
   push:
     branches:
+      - master
       - main
   workflow_dispatch:
 
